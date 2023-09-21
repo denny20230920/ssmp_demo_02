@@ -1,0 +1,13 @@
+ mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  type-aliases-package: com.demo.pojo
+  mapper-locations: classpath:com/demo/mapper/*.xml
+  global-config:
+    db-config:
+      table-prefix: tbl_
+      #id-type: assign_id
+      logic-delete-field: deleted
+      logic-not-delete-value: 1
+      logic-delete-value: 2
+    banner: off

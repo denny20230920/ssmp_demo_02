@@ -1,0 +1,112 @@
+#应用环境
+spring:
+  profiles:
+    active: @profile.active@
+    group:
+     test: testMVC,testDB,testMP,testRedis
+     dev: devMVC,devDB,devMP
+     pro: proMVC,proDB,proMP
+
+  devtools:
+    restart:
+      exclude: static/**,META-INF/maven/**,META-INF/resources/**,resources/**
+
+  task:
+    scheduling:
+      # 任务调度线程池大小，默认1
+      pool:
+        size: 1
+      # 调度线程池名称前缀，默认scheduling-
+      thread-name-prefix: spring_task_
+      # 线程池关闭时等待所有任务完成
+      shutdown:
+        await-termination: false
+        # 调度线程关闭前最大等待时间，确保任务最后一定关闭
+        await-termination-period: 10s
+
+  mail:
+    host: smtp.gmail.com
+    username: denny20221205@gmail.com
+    password: iudooqaeeymerrcw
+    # 表示使用 Gmail SMTP 服务器的 TLS 端口
+    port: 465
+    # 表示使用 UTF-8 编码
+    default-encoding: UTF-8
+    # 表示使用 SMTP 协议
+    protocol: smtp
+    properties:
+      "mail.smtp.auth": true  #表示启用身份验证，需要提供用户名和密码
+      "mail.smtp.ssl.enable": true  #表示启用 SSL 加密
+      "mail.smtp.starttls.enable": true    #表示启用 TLS 加密来保护邮件通信
+      "mail.smtp.starttls.required": true  #表示要求使用 TLS 加密来保护邮件通信
+
+  activemq:  # activeMQ的服务连接配置
+    broker-url: tcp://localhost:61616
+
+  jms:
+    pub-sub-domain: true #开启发布订阅模式
+    template:
+      default-destination: itheima #配置一个默认的存储路径
+
+memcached:
+  server: localhost:11211
+  poolsize: 10  # 连接池大小
+  timeout: 3000  # 超时时间3秒
+
+
+##jetCache缓存框架配置
+#jetcache:
+#  remote: #使用远程配置
+#    default:
+#      type: redis
+#      host: localhost
+#      port: 6379
+#      poolConfig:
+#        maxTotal: 50
+#    sms:
+#      type: redis
+#      host: localhost
+#      port: 6379
+#      poolConfig:
+#        maxTotal: 50
+
+
+#配置缓存ehcache
+#  cache:  # 配置使用的缓存类型,不配置默认使用simple
+#    type:  ehcache
+#    ehcache:  # 配置文件
+#      config: ehcache.xml
+
+
+
+
+
+#  elasticsearch:
+#    uris: http://localhost:9200
+
+
+testcase:
+  book:
+    id: ${random.int}
+    id2: ${random.int(10)} #0~10的随机数
+    id3: ${random.int(1,10)} #1~10的随机数
+    name: ${random.value}
+    type: ${random.value}
+    description: ${random.uuid}
+
+#logging:
+#  group:
+#    ebank: com.demo.controller
+#    iservice: com.alibaba
+#  level:
+#    root: info
+#    ebank: info
+  #pattern:
+    #%d日期
+    #%5p占5个位置的日志等级
+    #%n换行
+    #%clr()设置颜色,默认颜色绿色   %clr(){cyan}设置为青色
+    #%16t 进程名称，占位16靠右
+    #%-40.40c  %c执行的类名   %-40c占位40靠左  %-40.40c占位40靠左,显示长度只显示40个字符
+    #%m 消息
+    #console: "%d %clr(%5p) --- [%16t] %clr(%-40.40c){cyan} : %m %n"

@@ -1,0 +1,19 @@
+spring:
+  redis:
+    host: localhost
+    port: 6379
+#    jedis:
+#      pool:
+#        enabled: true
+#        max-active: 50
+    lettuce:  # 配置使用哪种客户端
+      pool:
+        max-active: 50
+
+#  cache:  #配置缓存redis
+#    type: redis
+#    redis:
+#      time-to-live: 10s # 存活时间10秒
+#      #key-prefix: code   #前缀配置
+#      use-key-prefix: true # 是否使用前缀，不使用前缀的重复性会很高
+#      cache-null-values: false # 是否缓存空值

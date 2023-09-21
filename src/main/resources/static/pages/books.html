@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>图书管理</title>
+    <style>
+        .el-table .warning-row {
+            background: oldlace;
+        }
+
+        .el-table .success-row {
+            background: #f0f9eb;
+        }
+        .page-container {
+            display: flex;
+            justify-content: flex-end;
+            /* 其他样式设置 */
+        }
+
+         .pagination-container {
+             margin-top: 20px; /* 调整上边距为20px，根据需要调整值 */
+         }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+
+    <el-form :inline="true"
+             :model="page.data"
+             class="demo-form-inline">
+        <el-form-item>
+            <el-input
+                    v-model="page.type"
+                    placeholder="图书类别">
+            </el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-input
+                    v-model="page.name"
+                    placeholder="图书名称">
+            </el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-input
+                    v-model="page.description"
+                    placeholder="图书描述">
+            </el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button  @click="ConditionSelectBooks">查询</el-button>
+            <el-button type="primary" @click="dialogFormVisible = true">新增</el-button>
+        </el-form-item>
+    </el-form>
+
+    <el-table
+            :data="books"
+            style="width: 100%">
+        <el-table-column
+                align="center"
+                label="编号"
+                type="index"
+                width="50">
+        </el-table-column>
+        <el-table-column
+                align="center"
+                prop="type"
+                label="图书类别"
+                width="300">
+        </el-table-column>
+        <el-table-column
+                align="center"
+                prop="name"
+                label="图书名称"
+                width="300">
+        </el-table-column>
+        <el-table-column
+                align="center"
+                prop="description"
+                label="图书描述"
+                width="300">
+        </el-table-column>
+        <el-table-column
+                align="center"
+                prop="createTime"
+                label="创建时间"
+                width="300">
+        </el-table-column>
+        <el-table-column label="操作">
+            <template slot-scope="scope">
+                <el-button
+                        size="mini"
+                        @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                <el-button
+                        size="mini"
+                        type="danger"
+                        @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+            </template>
+        </el-table-column>
+    </el-table>
+
+    <div class="block pagination-container" style="text-align: right;">
+        <el-pagination
+                class="page"
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="page.currentPage"
+                :page-sizes="[5, 10, 20, 50,100]"
+                :page-size="page.pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="page.total">
+        </el-pagination>
+    </div>
+
+    <el-dialog title="新增图书" :visible.sync="dialogFormVisible">
+        <el-form :model="book" :rules="rules">
+            <el-form-item
+                    label="图书类型"
+                    :label-width="formLabelWidth">
+                <el-input
+                        v-model="book.type"
+                        :style="{width:'300px'}">
+                </el-input>
+            </el-form-item>
+            <el-form-item
+                    label="图书名称"
+                    :label-width="formLabelWidth">
+                <el-input
+                        v-model="book.name"
+                        :style="{width:'300px'}">
+                </el-input>
+            </el-form-item>
+            <el-form-item
+                    label="图书描述"
+                    :label-width="formLabelWidth">
+                <el-input
+                        v-model="book.description"
+                        type="textarea"
+                        :rows="2"
+                        placeholder="请输入内容"
+                        v-model="textarea"
+                        :style="{width:'300px'}">
+                </el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="addBook">确 定</el-button>
+        </div>
+    </el-dialog>
+
+    <el-dialog title="编辑图书" :visible.sync="dialogFormVisible1">
+        <el-form :model="book" :rules="rules">
+            <el-form-item
+                    label="图书类型"
+                    :label-width="formLabelWidth">
+                <el-input
+                        v-model="book.type"
+                        :style="{width:'300px'}">
+                </el-input>
+            </el-form-item>
+            <el-form-item
+                    label="图书名称"
+                    :label-width="formLabelWidth">
+                <el-input
+                        v-model="book.name"
+                        :style="{width:'300px'}">
+                </el-input>
+            </el-form-item>
+            <el-form-item
+                    label="图书描述"
+                    :label-width="formLabelWidth">
+                <el-input
+                        v-model="book.description"
+                        type="textarea"
+                        :rows="2"
+                        placeholder="请输入内容"
+                        v-model="textarea"
+                        :style="{width:'300px'}">
+                </el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisible1 = false">取 消</el-button>
+            <el-button type="primary" @click="sumbitUpdateBook">确 定</el-button>
+        </div>
+    </el-dialog>
+
+
+</div>
+</body>
+
+<script src="../js/vue.js"></script>
+<script src="../js/axios-0.18.0.js"></script>
+<script src="../element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+
+<script>
+    new Vue({
+        el:"#app",
+        data: function () {
+            return {
+                books: [],
+                book: {
+                    id: 0,
+                    type: '',
+                    name: '',
+                    description: '',
+                    createTime: ''
+                },
+                page:{
+                    currentPage: 1,
+                    pageSize: 10,
+                    total: 0,
+                    type: '',
+                    name: '',
+                    description: ''
+                },
+                dialogFormVisible1: false,
+                dialogFormVisible: false,
+                formLabelWidth: '250px',
+                rules: {
+                    type: [
+                        {required: true, message: '请输入图书类别', trigger: 'blur'},
+                        {min: 2, max: 10, message: '长度在 1 到 20 个字符', trigger: 'blur'}
+                    ],
+                    name: [
+                        {required: true, message: '请输入图书名称', trigger: 'blur'}
+                    ]
+                }
+            }
+        },
+        mounted(){
+            //调用查询全部图书数据
+            this.getAll();
+        },
+        methods: {
+
+            //查询全部图书
+            getAll(){
+                axios.get("/books/"+this.page.currentPage+"/"+this.page.pageSize).then((res)=>{
+                    console.log(res.data.data);
+                    this.books = res.data.data.records;
+                    this.page.total = res.data.data.total;
+                });
+            },
+
+            //条件查询
+            ConditionSelectBooks() {
+
+                var param = "?param";
+
+                if (this.page.type != null || this.page.type != ''){
+                    param = param + "&type="+this.page.type;
+                }
+                if (this.page.name != null || this.page.name != ''){
+                    param = param + "&name="+this.page.name;
+                }
+                if (this.page.description != null || this.page.description != ''){
+                    param = param + "&description="+this.page.description;
+                }
+                //按条件分页查询数据
+                axios.get("/books/"+this.page.currentPage+"/"+this.page.pageSize+param).then((res)=>{
+                    this.books = res.data.data.records
+                    this.page.total = res.data.data.total
+                });
+            },
+
+            //新增图书
+            addBook(){
+                axios.post("/books",this.book).then((res)=>{
+                    if (res.data.data == true){
+                        this.dialogFormVisible = false;
+                        this.getAll();
+                        this.$message({
+                            message: '成功新增图书',
+                            type: 'success'
+                        });
+                        this.book = {};
+                    }else{
+                        var msg = res.data.msg;
+                        this.$message.error(msg);
+                    }
+                });
+            },
+
+            //打开编辑图书的弹框
+            handleEdit(index, row) {
+                console.log(index, row);
+                //根据id查询图书
+                axios.get("/books/"+row.id).then((res)=>{
+                    this.book = res.data.data;
+                });
+                //打开编辑弹窗
+                this.dialogFormVisible1 = true;
+            },
+            //编辑图书信息后提交
+            sumbitUpdateBook(){
+                axios.put("/books",this.book).then((res)=>{
+                    if (res.data.data == true){
+                        this.dialogFormVisible1 = false;
+                        this.ConditionSelectBooks
+                        this.$message({message: '成功编辑图书',type: 'success'});
+                        this.book = {};
+                    }else{
+                        var msg = res.data.msg;
+                        this.$message.error(msg);
+                    }
+                });
+            },
+
+            //删除图书
+            handleDelete(index, row) {
+                console.log(index, row);
+                this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    //调用删除接口
+                    axios.delete("/books/"+row.id).then((res)=>{
+                        if (res.data.data == true){
+                            this.ConditionSelectBooks();
+                        }else{
+                            var msg = res.data.msg;
+                            this.$message.error(msg);
+                        }
+                    });
+                    this.$message({type: 'success',message: '删除成功!'});
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+
+            //页面条数
+            handleSizeChange(val) {
+                console.log(`每页 ${val} 条`);
+                this.page.pageSize = val;
+                this.ConditionSelectBooks();
+            },
+
+            //页码
+            handleCurrentChange(val) {
+                console.log(`当前页: ${val}`);
+                this.page.currentPage = val;
+                this.ConditionSelectBooks();
+            }
+
+        }
+    });
+</script>
+
+</html>
